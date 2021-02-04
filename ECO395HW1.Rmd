@@ -1,0 +1,351 @@
+---
+title: "ECO 395 Homework 1"
+author: "Yefu Chen"
+date: "2/3/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## QUESTION 1 Data visualization: gas prices
+People have a lot of pet theories about what explains the variation in prices between gas stations. Here are several such theories below. Which of these theories seem plausible, and which are unsupported by data? Take each theory one by one and assess the evidence for or against the theory using the suggested plot in parentheses.
+
+### A) Gas stations charge more if they lack direct competition in sight (boxplot).
+According to the claim, the stations with competitors should have a lower price compared to those without. The Figure 1-1 is consistent with this claim. The mean gasoline price of stations with competitors does be lower than those without competitors. 
+
+```{r Q1 A, echo=FALSE}
+library(readxl)
+library(ggplot2)
+GasPrices <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/GasPrices.xlsx")
+ggplot(GasPrices, aes(x=Competitors, y=Price)) + 
+  geom_boxplot()
+```
+Figure 1-1.
+
+### B) The richer the area, the higher the gas price (scatter plot).
+According to the claim, the price of stations in areas with higher income should be higher. The Figure 1-2 is consistent with this claim. With income rising, the price of gasoline is also increasing. 
+
+```{r Q1 B, echo=FALSE}
+library(readxl)
+library(ggplot2)
+GasPrices <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/GasPrices.xlsx")
+ggplot(GasPrices, aes(x=Income, y=Price)) + 
+  geom_point()+
+  geom_smooth(formula = y~x, se = FALSE, method=glm)
+```
+Figure 1-2.
+
+### C) Shell charges more than other brands (bar plot).
+According to the claim, the price of Shell gasoline should be the most expensive. The Figure 1-3 is inconsistent with this claim. The price of Shell gasoline is high but lower than "other brands".
+
+```{r Q1 C, echo=FALSE}
+library(readxl)
+library(ggplot2)
+GasPrices <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/GasPrices.xlsx")
+ggplot(data=GasPrices, aes(x=Brand, y=Price)) +
+  geom_col()
+```
+Figure 1-3.
+
+### D) Gas stations at stoplights charge more (faceted histogram).
+According to the claim, gas stations at stoplights charge more. The first figure supports this claim. The average price of gas stations at stoplights is more than those far away. However, if we control the effect of income, shown as the second figure, the effect of neighborhood income on gasoline price is larger in gas stations near stoplights. Hence, this claim needs further analysis to be supported or rejected. 
+
+```{r Q1 D, echo=FALSE}
+library(readxl)
+library(ggplot2)
+GasPrices <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/GasPrices.xlsx")
+ggplot(GasPrices, aes(x=Stoplight, y=Price)) + 
+  geom_boxplot()
+sp <- ggplot(GasPrices, aes(x=Income, y=Price)) + geom_point(shape=1) +geom_smooth(formula = y~x, se = FALSE, method=glm)
+sp + facet_grid(Stoplight ~ .)
+```
+Figures 1-4.
+
+### E) Gas stations with direct highway access charge more (your choice of plot).
+According to the claim, gas stations with direct highway access charge more. The first figure supports this claim. The average price of gas stations near highway access is more than those far away. However, if we control the effect of income, shown as the second figure, the effect of neighborhood income on gasoline price is larger in gas stations near highway entrances. Hence, this claim needs further analysis to be supported or rejected. 
+
+```{r Q1 E, echo=FALSE}
+library(readxl)
+library(ggplot2)
+GasPrices <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/GasPrices.xlsx")
+ggplot(GasPrices, aes(x=Highway, y=Price)) + 
+  geom_boxplot()
+sp2 <- ggplot(GasPrices, aes(x=Income, y=Price)) + geom_point(shape=1) +geom_smooth(formula = y~x, se = FALSE, method=glm)
+sp2 + facet_grid(Highway ~ .)
+```
+Figures 1-5.
+
+## QUESTION 2 Data visualization: a bike share network
+Your task in this problem is to prepare three figures.
+
+### Plot A: a line graph showing average bike rentals (total) versus hour of the day (hr).
+The following Figures 2-1 presents the average bike rentals by hours. It indicates that there are two peak hours. The morning peak hour happens at 8 am and the afternoon peak hour happens at 5 pm. Most of the bike rentals gather between 6 am to 8 pm. 
+
+```{r Q2 A, message=FALSE,echo=FALSE}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+bikeshare <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/bikeshare.xlsx")
+t1<-bikeshare %>% 
+  group_by(hr) %>% 
+  summarise(average = mean(total))
+ggplot(data=t1, aes(x=hr, y=average)) +
+  geom_line()+
+  geom_point()
+
+```
+Figures 2-1.
+
+### Plot B: a faceted line graph showing average bike rentals versus hour of the day, faceted according to whether it is a working day (workingday).
+The following Figures 2-2 shows average bike rentals versus the hour of the day, faceted according to whether it is a working day. It indicates that the "peak" hours are not obvious on weekdays while significant during weekends. 
+
+There are two peak hours during weeknds. The morning peak hour happens at 8 am and the afternoon peak hour happens at 5 pm. Most of the bike rentals gather between 6 am to 8 pm. Also, it seems that there can be more usages during the weekend, which indicates that riders may use the shared bikes for entertainment or recreation instead of commuting.
+
+```{r Q2 B,message=FALSE,echo=FALSE}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+bikeshare <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/bikeshare.xlsx")
+bikeshare0 <- bikeshare[bikeshare$holiday == 0,]
+bikeshare1 <- bikeshare[bikeshare$holiday == 1,]
+
+t2_1<-bikeshare0 %>% 
+  group_by(hr) %>% 
+  summarise(average = mean(total))
+t2_1$holiday="weekend"
+
+t2_2<-bikeshare1 %>% 
+  group_by(hr) %>% 
+  summarise(average = mean(total))
+t2_2$holiday="weekday"
+
+t2=merge(t2_1,t2_2, by="hr",all=TRUE)
+t3<-rbind(t2_1,t2_2)
+
+sp2 <- ggplot(t3, aes(x=hr, y=average)) + geom_point(shape=1)
+sp2 + facet_grid(holiday ~ .)
+```
+Figures 2-2.
+
+### Plot C: a faceted bar plot showing average ridership during the 8 AM hour by weather situation code (weathersit), faceted according to whether it is a working day or not. Note: remember you can focus on a specific subset of rows of a data set using filter.
+Interestingly, it seems that there are only two weather conditions during the weekdays and 3 conditions during weekends. During the weekdays, the weather conditions include type 1 (Clear, Few clouds, Partly cloudy, Partly cloudy) and type 2 (Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist). During the weekends, the weather conditions not only include conditions during weekdays but also type 3(Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds).
+
+Also, considering the average rentals, in both conditions during weekdays, the rentals are small, while it seems that bad cloudy cannot stop riders to ride a bicycle at 8 am during the weekend, but snow and rain can. 
+
+```{r Q2 C, message=FALSE,echo=FALSE}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+bikeshare <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/bikeshare.xlsx")
+bikeshare_8<-bikeshare %>%
+  filter(hr==8)
+
+bikeshare_80 <- bikeshare_8[bikeshare_8$holiday == 0,]
+bikeshare_81 <- bikeshare_8[bikeshare_8$holiday == 1,]
+
+t2_1<-bikeshare_80 %>% 
+  group_by(weathersit) %>% 
+  summarise(average = mean(total))
+t2_1$holiday="weekend"
+
+t2_2<-bikeshare_81 %>% 
+  group_by(weathersit) %>% 
+  summarise(average = mean(total))
+t2_2$holiday="weekday"
+
+t3<-rbind(t2_1,t2_2)
+
+sp2 <- ggplot(t3, aes(x=weathersit, y=average)) + geom_point(shape=1)
+sp2 + facet_grid(holiday ~ .)
+
+```
+Figures 2-3.
+
+## QUESTION 3 Data visualization: flights at ABIA
+Your task is to create a figure, or set of related figures, that tell an interesting story about flights into and out of Austin. You should annotate your figure(s), of course, but strive to make them as easy to understand as possible at a quick glance. (A single figure shouldn't need many, many paragraphs to convey its meaning.)
+
+**My reserach question is when is the best to fly from/to austin (with least delay).**
+
+We cannot simply sum the number of delayed flight to find the "worst" day since the number of flight by days is various. We have to nominate the number of delayed fight as the rates of delay. 
+
+The following Figures 3-1 present the rate of delay by months, days, and weekdays. Focusing on the first figure, we may refuse to vist Austin airport in summer break, including June, July, and Auguts. Every 25th of months is also the date we want to avoid to go to the Austin airport. Monday, Wednesday, and Thursday are three dates when rates of delay are high. 
+
+```{r Q3 A, message=FALSE,warning=FALSE,echo=FALSE}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+air <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/ABIA.xlsx")
+air_AUS <- air[air$Origin == "AUS"|air$Dest == "AUS",]
+air_AUS$count=1
+air_AUS$ArrDelayIndex=ifelse(air_AUS$ArrDelay<=0,0,1)
+air_AUS$DepDelayIndex=ifelse(air_AUS$DepDelay<=0,0,1)
+
+p1<-air_AUS %>% 
+  group_by(Month) %>% 
+  summarise(Number = sum(count))
+p1$Month=factor(p1$Month)
+
+
+p2<-air_AUS %>% 
+  group_by(DayofMonth) %>% 
+  summarise(Number = sum(count))
+p2$DayofMonth=factor(p2$DayofMonth)
+
+
+p3<-air_AUS %>% 
+  group_by(DayOfWeek) %>% 
+  summarise(Number = sum(count))
+p3$DayOfWeek=factor(p3$DayOfWeek)
+
+
+air_AUS_BDelay<-air_AUS %>%
+  filter(ArrDelay==1 | DepDelay==1)
+p1_BD<-air_AUS_BDelay %>% 
+  group_by(Month) %>% 
+  summarise(Number = sum(count))
+p1_BD$Month=factor(p1_BD$Month)
+
+p2_BD<-air_AUS_BDelay %>% 
+  group_by(DayofMonth) %>% 
+  summarise(Number = sum(count))
+p2_BD$DayofMonth=factor(p2_BD$DayofMonth)
+p3_BD<-air_AUS_BDelay %>% 
+  group_by(DayOfWeek) %>% 
+  summarise(Number = sum(count))
+p3_BD$DayOfWeek=factor(p3_BD$DayOfWeek)
+
+p1_month=merge(p1,p1_BD, by="Month",all=TRUE)
+p2_date=merge(p2,p2_BD,by="DayofMonth",all=TRUE)
+p3_DoW=merge(p3,p3_BD, by="DayOfWeek",all=TRUE)
+
+p1_month$rate=p1_month$Number.y/p1_month$Number.x
+p2_date$rate=p2_date$Number.y/p2_date$Number.x
+p3_DoW$rate=p3_DoW$Number.y/p3_DoW$Number.x
+
+ggplot(data=p1_month, aes(x=Month, y=rate)) +
+  geom_bar(stat="identity")
+ggplot(data=p2_date, aes(x=DayofMonth, y=rate)) +
+  geom_bar(stat="identity")
+ggplot(data=p3_DoW, aes(x=DayOfWeek, y=rate)) +
+  geom_bar(stat="identity")
+
+```
+Figures 3-1.
+
+The following Figures 3-2 present the average arrival delay and departure delay by date. The first figure presents the arrival delay. It indicates that some dates, such as March 8 and 29, may not be a good chance to visit Austin by airplane. The second figure presents some dates, such as March 8 and 29 still, which may not be a good chance to leave Austin by airplane. Also, the similarity indicates that if a day with more arrival delay, it is a high possibility of more departure delay. 
+
+```{r Q3 B, message=FALSE,warning=FALSE,echo=FALSE}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+air <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/ABIA.xlsx")
+air_AUS <- air[air$Origin == "AUS"|air$Dest == "AUS",]
+air_AUS$count=1
+air_AUS$ArrDelayIndex=ifelse(air_AUS$ArrDelay<=0,0,1)
+air_AUS$DepDelayIndex=ifelse(air_AUS$DepDelay<=0,0,1)
+
+
+air_AUS_q3 <- air_AUS[,c("Month","DayofMonth","ArrDelay", "DepDelay")]
+air_AUS_q3 <- na.omit(air_AUS_q3)
+air_AUS_q3 <- air_AUS_q3[air_AUS_q3$ArrDelay!="NA",]
+air_AUS_q3 <- air_AUS_q3[air_AUS_q3$DepDelay!="NA",]
+
+
+air_AUS_q3$ArrDelay=as.numeric(air_AUS_q3$ArrDelay)
+air_AUS_q3$DepDelay=as.numeric(air_AUS_q3$DepDelay)
+
+p <- ggplot(air_AUS_q3, aes(x=factor(Month),y=factor(DayofMonth)))
+p <- p + geom_tile(aes(fill=ArrDelay))
+p <- p + scale_fill_gradient(low = "white", high = "red")
+p <- p + theme()
+p
+
+p <- ggplot(air_AUS_q3, aes(x=factor(Month),y=factor(DayofMonth)))
+p <- p + geom_tile(aes(fill=DepDelay))
+p <- p + scale_fill_gradient(low = "white", high = "blue")
+p <- p + theme()
+p
+
+```
+Figures 3-2.
+
+## QUESTION 4 K-nearest neighbors
+For each trim, make a plot of RMSE versus K, so that we can see where it bottoms out. Then for the optimal value of K, show a plot of the fitted model, i.e. predictions vs. x. Which trim yields a larger optimal value of K? Why do you think this is?
+
+*Conclusion: the model performs best for 350 and 65 AMG when the number of neighbors is 20.*
+
+Figure 4-1 presents the testing process of 350 trim. I chose the number of neighbors as 1, 3, 5, 20, and 30. Results indicated that the best parameter is 20 (with the least RMSE). When the number of neighbors is less than 20, more neighbors lead to more accurate models. In contrast, situations change when neighbors are larger than 20. 
+
+```{r Q4 A, message=FALSE,warning=FALSE,echo=FALSE}
+library(tidyverse)
+library(caret)
+library(dplyr)
+library(FNN)
+library(modelr)
+library(ggplot2)
+library(readxl)
+
+CLASSS <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/sclass.xlsx")
+summary(CLASSS$trim)
+
+trim1 = CLASSS[CLASSS$trim=="350",]
+trim1=trim1[,c("mileage","price")]
+
+training.samples <- trim1$price %>% 
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- trim1[training.samples, ]
+test.data <- trim1[-training.samples, ]
+
+knn200 = knnreg(price~mileage, data=train.data,k=30)
+knn100 = knnreg(price~mileage, data=train.data,k=20)
+knn50 = knnreg(price~mileage, data=train.data,k=5)
+knn10 = knnreg(price~mileage, data=train.data,k=3)
+knn1 = knnreg(price~mileage, data=train.data,k=1)
+
+p1 <- data.frame(Neighbors=c(1,3,5,20,30), 
+                 RMSE=c(rmse(knn1, test.data), rmse(knn10, test.data), rmse(knn50, test.data),rmse(knn100, test.data),rmse(knn200, test.data)))
+
+ggplot(data=p1, aes(x=Neighbors, y=RMSE)) +
+  geom_line()+
+  geom_point()
+
+```
+Figure 4-1. 
+
+Figure 4-2 presents the testing process of 65 AMG trim. I chose the number of neighbors as 1, 3, 5, 20, and 30. Results indicated that the best parameter is 20 (with the least RMSE). When the number of neighbors is less than 20, more neighbors lead to more accurate models. In contrast, situations change when neighbors are larger than 20. 
+
+```{r Q4 B, message=FALSE,warning=FALSE,echo=FALSE}
+library(tidyverse)
+library(caret)
+library(dplyr)
+library(FNN)
+library(modelr)
+library(ggplot2)
+
+CLASSS <- read_excel("C:/Users/cheny/Desktop/UIL 2021 Spring/ECO395M/W2/Exercise1/sclass.xlsx")
+summary(CLASSS$trim)
+
+trim2 = CLASSS[CLASSS$trim=="65 AMG",]
+trim2=trim2[,c("mileage","price")]
+
+training.samples <- trim2$price %>% 
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- trim2[training.samples, ]
+test.data <- trim2[-training.samples, ]
+
+knn200 = knnreg(price~mileage, data=train.data,k=30)
+knn100 = knnreg(price~mileage, data=train.data,k=20)
+knn50 = knnreg(price~mileage, data=train.data,k=5)
+knn10 = knnreg(price~mileage, data=train.data,k=3)
+knn1 = knnreg(price~mileage, data=train.data,k=1)
+
+p1 <- data.frame(Neighbors=c(1,3,5,20,30), 
+                 RMSE=c(rmse(knn1, test.data), rmse(knn10, test.data), rmse(knn50, test.data),rmse(knn100, test.data),rmse(knn200, test.data)))
+
+ggplot(data=p1, aes(x=Neighbors, y=RMSE)) +
+  geom_line()+
+  geom_point()
+```
+Figure 4-2. 
